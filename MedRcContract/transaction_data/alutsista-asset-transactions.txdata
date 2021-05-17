@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "alutsistaAssetExists",
+        "transactionLabel": "A test alutsistaAssetExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createAlutsistaAsset",
+        "transactionLabel": "A test createAlutsistaAsset transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readAlutsistaAsset",
+        "transactionLabel": "A test readAlutsistaAsset transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateAlutsistaAsset",
+        "transactionLabel": "A test updateAlutsistaAsset transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteAlutsistaAsset",
+        "transactionLabel": "A test deleteAlutsistaAsset transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
