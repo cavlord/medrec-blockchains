@@ -97,7 +97,7 @@ export class MedRecAssetContract extends Contract {
         medRecAsset.registNumb = "";
         medRecAsset.faskesID = "";
         medRecAsset.faskesName= "";
-        medRecAsset.noRM = "";
+        medRecAsset.noRM = [];
         medRecAsset.poli = "";
         medRecAsset.dokter = "";
         medRecAsset.diagnose =[];
@@ -131,6 +131,37 @@ export class MedRecAssetContract extends Contract {
         }
     }
 
+    @Transaction(false)
+    @Returns('MedRecAsset')
+    public async readMedRecAssetHospital(ctx: Context, NOBPJS: string, faskesID: string): Promise<MedRecAsset> {
+        const exists = await this.MedRecAssetExist(ctx, NOBPJS);
+        if (!exists) {
+            throw new Error(`The medRec asset ${NOBPJS} does not exist`);
+        }
+        const buffer = await ctx.stub.getState(NOBPJS);
+        const medRecAsset = JSON.parse(buffer.toString()) as MedRecAsset;
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+            } 
+        }
+
+        if (whitelist){
+            try {
+                const privBuffer = await ctx.stub.getPrivateData("GovRemark",NOBPJS);
+                medRecAsset.remark = privBuffer.toString();
+                return medRecAsset;
+            } catch (error) {
+                return medRecAsset;
+            }
+        } else {
+            throw new Error(`You are not authorized to see this medical record`);
+        }
+     
+    }
+
     
     @Transaction()
     public async MedReservation(ctx: Context,NOBPJS:string, newfaskesID:string, newfaskesName:string,newpoli:string, newreserveDate:string,newregistNumb:string) {
@@ -146,6 +177,8 @@ export class MedRecAssetContract extends Contract {
         medRecAsset.poli= newpoli,
         medRecAsset.reserveDate = newreserveDate;
         medRecAsset.registNumb = newregistNumb;
+        medRecAsset.noRM.push(newfaskesID);
+
         await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
         
     }
@@ -213,59 +246,107 @@ export class MedRecAssetContract extends Contract {
 
 
     @Transaction()
-    public async AssignDokter(ctx: Context,NOBPJS:string,dokter:string) {
+    public async AssignDokter(ctx: Context,NOBPJS:string,faskesID:string,dokter:string) {
         const ktpAsBytes = await ctx.stub.getState(NOBPJS); 
         if (!ktpAsBytes || ktpAsBytes.length === 0) {
             throw new Error(`${NOBPJS} does not exist`);
         }
 
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
-        medRecAsset.dokter = dokter
-        medRecAsset.noRM = `${medRecAsset.faskesID}-${medRecAsset.ktp}`
-        await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+            } 
+        }
+
+        if (whitelist){
+            medRecAsset.dokter = dokter;
+            await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        } else {
+            throw new Error(`You are not authorized to see this medical record`);
+        }
+        
         
     }
 
     @Transaction()
-    public async Diagnose(ctx: Context,NOBPJS:string, diagnoseID:string, diagnoseName:string) {
+    public async Diagnose(ctx: Context,NOBPJS:string, faskesID:string, diagnoseID:string, diagnoseName:string) {
         const ktpAsBytes = await ctx.stub.getState(NOBPJS); 
         if (!ktpAsBytes || ktpAsBytes.length === 0) {
             throw new Error(`${NOBPJS} does not exist`);
             }
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
-               medRecAsset.diagnose.push({diagnoseID,diagnoseName})
-       
-       
-        await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+            } 
+        }
+
+        if (whitelist){
+            medRecAsset.diagnose.push({diagnoseID,diagnoseName})
+            await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        } else {
+            throw new Error(`You are not authorized to see this medical record`);
+        }
+               
         
     }
     
     @Transaction()
-    public async Therapy(ctx: Context,NOBPJS:string, diagnoseID:string,therapyID:string, therapyName:string) {
+    public async Therapy(ctx: Context,NOBPJS:string, faskesID:string, diagnoseID:string,therapyID:string, therapyName:string) {
         const ktpAsBytes = await ctx.stub.getState(NOBPJS); 
         if (!ktpAsBytes || ktpAsBytes.length === 0) {
             throw new Error(`${NOBPJS} does not exist`);
             }
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
-               medRecAsset.therapy.push({diagnoseID,therapyID,therapyName})
-       
-       
-        await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+            } 
+        }
+
+        if (whitelist){
+            medRecAsset.therapy.push({diagnoseID,therapyID,therapyName})
+            await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        } else {
+            throw new Error(`You are not authorized to see this medical record`);
+        }
+               
         
     }
 
     
     @Transaction()
-    public async drug(ctx: Context,NOBPJS:string, diagnoseID:string,therapyID:string,drugID:string,drugName:string) {
+    public async drug(ctx: Context,NOBPJS:string, faskesID:string,diagnoseID:string,therapyID:string,drugID:string,drugName:string) {
         const ktpAsBytes = await ctx.stub.getState(NOBPJS); 
         if (!ktpAsBytes || ktpAsBytes.length === 0) {
             throw new Error(`${NOBPJS} does not exist`);
             }
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
-               medRecAsset.drug.push({diagnoseID,therapyID,drugID,drugName})
-       
-       
-        await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+            } 
+        }
+
+        if (whitelist){
+            medRecAsset.drug.push({diagnoseID,therapyID,drugID,drugName})
+            await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        } else {
+            throw new Error(`You are not authorized to see this medical record`);
+        }
+               
         
     }
 

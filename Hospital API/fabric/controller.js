@@ -237,6 +237,7 @@ exports.reserveconfirm = async (req, res, next) => {
       await contract.submitTransaction(
         "Diagnose",
         data.id,
+        data.faskesID,
         data.diagnoseID,
         data.diagnoseName
         );
@@ -261,6 +262,7 @@ exports.reserveconfirm = async (req, res, next) => {
       await contract.submitTransaction(
         "Therapy",
         data.id,
+        data.faskesID,
         data.diagnoseID,
         data.therapyID,
         data.therapyName
@@ -288,6 +290,7 @@ exports.reserveconfirm = async (req, res, next) => {
       await contract.submitTransaction(
         "drug",
         data.id,
+        data.faskesID,
         data.diagnoseID,
         data.therapyID,
         data.drugID,
@@ -300,6 +303,32 @@ exports.reserveconfirm = async (req, res, next) => {
       next(error);
     }
   };
+
+  exports.getByID = async (req, res, next) => {
+    try {
+      // connect to network
+      const network = await connectToNetwork();
+  
+      // Get the contract from the network.
+      const contract = network.getContract("MedRec-Contract");
+  
+      // Submit the specified transaction.
+      const data = req.body;
+      const result = await contract.evaluateTransaction(
+        "readMedRecAssetHospital",
+        req.query.key,
+        data.faskesID
+      );
+      
+      console.log(`Transaction has been evaluated. Result: ${result}`);
+  
+      res.status(200).send(result);
+    } catch (error) {
+      console.error(`Failed to submit transaction: ${error}`);
+      process.exit(1);
+    }
+  };
+  
 
   
   

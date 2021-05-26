@@ -28,7 +28,7 @@ export class MedRecAsset {
     
     public faskesID:string;
     public faskesName:string;
-    public noRM:string;
+    public noRM:any;
     public poli:string;
     public dokter:string;
     public alergi:any;
