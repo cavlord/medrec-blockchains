@@ -17,7 +17,7 @@ export class MedRecAsset {
     public dob:string;
     public alamat : string;
     public maritalstatus: string;
-    public komrobit:string;
+    public komorbid:string;
 
     public reserveDate:string;
     public diagnose:any;
