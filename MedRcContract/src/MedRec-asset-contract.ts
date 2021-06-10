@@ -281,6 +281,7 @@ export class MedRecAssetContract extends Contract {
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
 
         let whitelist = false;
+        let date = new Date();
         
         for (let i = 0; i < medRecAsset.noRM.length; i++){
             if (faskesID === medRecAsset.noRM[i]){
@@ -289,7 +290,7 @@ export class MedRecAssetContract extends Contract {
         }
 
         if (whitelist){
-            medRecAsset.diagnose.push({diagnoseID,diagnoseName})
+            medRecAsset.diagnose.push({diagnoseID,diagnoseName,faskesID,date})
             await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
         } else {
             throw new Error(`You are not authorized to see this medical record`);
@@ -307,6 +308,7 @@ export class MedRecAssetContract extends Contract {
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
 
         let whitelist = false;
+        let date = new Date();
         
         for (let i = 0; i < medRecAsset.noRM.length; i++){
             if (faskesID === medRecAsset.noRM[i]){
@@ -315,7 +317,7 @@ export class MedRecAssetContract extends Contract {
         }
 
         if (whitelist){
-            medRecAsset.therapy.push({diagnoseID,therapyID,therapyName})
+            medRecAsset.therapy.push({diagnoseID,therapyID,therapyName, date})
             await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
         } else {
             throw new Error(`You are not authorized to see this medical record`);
@@ -334,6 +336,7 @@ export class MedRecAssetContract extends Contract {
         const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
 
         let whitelist = false;
+        let date = new Date();
         
         for (let i = 0; i < medRecAsset.noRM.length; i++){
             if (faskesID === medRecAsset.noRM[i]){
@@ -342,7 +345,7 @@ export class MedRecAssetContract extends Contract {
         }
 
         if (whitelist){
-            medRecAsset.drug.push({diagnoseID,therapyID,drugID,drugName})
+            medRecAsset.drug.push({diagnoseID,therapyID,drugID,drugName, date})
             await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
         } else {
             throw new Error(`You are not authorized to see this medical record`);
@@ -471,6 +474,32 @@ export class MedRecAssetContract extends Contract {
                 return JSON.stringify(allResults);
             }
         }
+    }
+
+    @Transaction()
+    public async MedReservationEnd(ctx: Context,NOBPJS:string, faskesID:string) {
+        const ktpAsBytes = await ctx.stub.getState(NOBPJS); 
+        if (!ktpAsBytes || ktpAsBytes.length === 0) {
+            throw new Error(`${NOBPJS} does not exist`);
+            }
+        const medRecAsset: MedRecAsset = JSON.parse(ktpAsBytes.toString());
+
+        let whitelist = false;
+        
+        for (let i = 0; i < medRecAsset.noRM.length; i++){
+            if (faskesID === medRecAsset.noRM[i]){
+                whitelist = true;
+                medRecAsset.noRM.splice(i, 1);
+            } 
+        }
+
+        if (whitelist){
+            await ctx.stub.putState(NOBPJS, Buffer.from(JSON.stringify(medRecAsset)));
+        } else {
+            throw new Error(`This Hospital is not in the whitelist`);
+        }
+               
+        
     }
    
     // @Transaction()

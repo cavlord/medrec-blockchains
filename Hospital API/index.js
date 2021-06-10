@@ -15,6 +15,7 @@ app.put("/assign", fabric.assignDockter);
 app.put("/diagnose", fabric.addDiagnose);
 app.put("/therapy", fabric.addTherapy);
 app.put("/drug", fabric.addDrug);
+app.put("/end", fabric.EndReservation);
 
 // app.get("/history", fabric.getHistoryForKey);
 
